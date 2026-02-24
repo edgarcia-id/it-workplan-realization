@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT Work Plan & Realization (RKB/RKM) | Ed Garcia</title>
+    <link rel="icon" href="assets/img/icon-nusait.webp" sizes="192x192" type="image/webp" />
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+
+    <style>
+        body { background-color: #f4f7f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .header-brand { background: #0f172a; color: white; padding: 25px; border-bottom: 5px solid #3b82f6; margin-bottom: 30px; }
+        .card-custom { border: none; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 20px; }
+        
+        .stat-box { background: #fff; padding: 15px; border-radius: 8px; border-left: 4px solid #e2e8f0; text-align: center; }
+        .stat-box.success { border-color: #10b981; }
+        .stat-box.warning { border-color: #f59e0b; }
+        .stat-number { font-size: 1.8rem; font-weight: bold; color: #1e293b; }
+        
+        .badge-done { background-color: #d1fae5; color: #065f46; }
+        .badge-progress { background-color: #dbeafe; color: #1e40af; }
+        .badge-delayed { background-color: #fee2e2; color: #991b1b; }
+    </style>
+</head>
+<body>
+
+<div class="header-brand">
+    <div class="container d-flex justify-content-between align-items-center">
+        <div>
+            <h3 class="mb-0 fw-bold"><i class="fas fa-tasks"></i> IT Work Plan & Realization</h3>
+            <p class="mb-0 opacity-75 small">Rencana Kerja Bulanan (RKB) / Mingguan (RKM)</p>
+        </div>
+        <div class="text-end small d-none d-md-block">
+            Tool by <a href="https://nusait.com" class="text-white text-decoration-none fw-bold">Ed Garcia (NusaIT)</a>
+        </div>
+    </div>
+</div>
+
+<div class="container pb-5">
+    <div class="row mb-3">
+        <div class="col-lg-8">
+            <div class="card card-custom p-3 h-100">
+                <h6 class="text-uppercase text-muted fw-bold small mb-3">1. Report Period & Info</h6>
+                <div class="row g-2">
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold">Department Head</label>
+                        <input type="text" id="managerName" class="form-control form-control-sm" placeholder="e.g. Ed Garcia">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold">Report Type</label>
+                        <select id="reportType" class="form-select form-select-sm">
+                            <option value="Monthly (RKB)">Monthly (RKB)</option>
+                            <option value="Weekly (RKM)">Weekly (RKM)</option>
+                            <option value="Quarterly">Quarterly</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold">Period (Month/Week)</label>
+                        <input type="text" id="periodStr" class="form-control form-control-sm" placeholder="e.g. October 2025">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card card-custom p-3 h-100 bg-light">
+                <h6 class="text-uppercase text-muted fw-bold small mb-3">KPI Summary</h6>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="text-center">
+                        <div class="small text-muted">Total Plans</div>
+                        <div class="stat-number" id="totalPlans">0</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="small text-muted">Completed</div>
+                        <div class="stat-number text-success" id="completedPlans">0</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="small text-muted">Success Rate</div>
+                        <div class="stat-number text-primary" id="successRate">0%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card card-custom p-3 bg-white">
+        <h6 class="text-uppercase text-muted fw-bold small mb-3">2. Add Work Plan (Target)</h6>
+        <div class="row g-2 align-items-end">
+            <div class="col-md-5">
+                <label class="form-label small fw-bold">Program / Task Name</label>
+                <input type="text" id="taskName" class="form-control form-control-sm" placeholder="e.g. Upgrade ERP Server RAM">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label small fw-bold">Target KPI / Deliverable</label>
+                <input type="text" id="taskTarget" class="form-control form-control-sm" placeholder="e.g. 100% migrated by Friday">
+            </div>
+            <div class="col-md-3">
+                <button onclick="addPlan()" class="btn btn-primary btn-sm w-100"><i class="fas fa-plus"></i> Add to Plan</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card card-custom p-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="text-uppercase text-muted fw-bold small mb-0">3. Realization & Status</h6>
+            <button onclick="generatePDF()" class="btn btn-danger btn-sm"><i class="fas fa-file-pdf"></i> Generate Exec Report</button>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle text-sm">
+                <thead class="table-light small text-center">
+                    <tr>
+                        <th width="25%">Planned Program</th>
+                        <th width="20%">Target / KPI</th>
+                        <th width="25%">Actual Realization</th>
+                        <th width="15%">Status</th>
+                        <th width="15%">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="planTableBody">
+                    </tbody>
+            </table>
+        </div>
+        <div id="emptyState" class="text-center py-4 text-muted">
+            <i class="fas fa-clipboard-list fa-2x mb-2 opacity-25"></i>
+            <p class="small">No plans added for this period.</p>
+        </div>
+    </div>
+    
+    <div class="text-center mt-3 text-muted small">
+        <p>Strategic IT Planning helps align technology with business goals.</p>
+        <p>Need to draft an IT Master Plan? <a href="https://nusait.com/about" class="fw-bold text-decoration-none">Consult Ed Garcia</a>.</p>
+    </div>
+</div>
+
+<script>
+    let plans = [];
+
+    function addPlan() {
+        const name = document.getElementById('taskName').value;
+        const target = document.getElementById('taskTarget').value;
+
+        if (!name) return alert("Please enter a Program/Task name.");
+
+        plans.push({
+            id: Date.now(),
+            name: name,
+            target: target || "Complete task",
+            realization: "",
+            status: "Pending"
+        });
+
+        document.getElementById('taskName').value = '';
+        document.getElementById('taskTarget').value = '';
+        renderTable();
+    }
+
+    function removePlan(id) {
+        plans = plans.filter(p => p.id !== id);
+        renderTable();
+    }
+
+    function updateRealization(id, field, value) {
+        const plan = plans.find(p => p.id === id);
+        if (plan) {
+            plan[field] = value;
+            updateStats();
+        }
+    }
+
+    function renderTable() {
+        const tbody = document.getElementById('planTableBody');
+        const emptyState = document.getElementById('emptyState');
+        tbody.innerHTML = '';
+
+        if (plans.length === 0) {
+            emptyState.style.display = 'block';
+            updateStats();
+            return;
+        }
+        emptyState.style.display = 'none';
+
+        plans.forEach(p => {
+            // Status Selection Logic
+            const statuses = ["Pending", "In Progress", "Done", "Delayed", "Cancelled"];
+            let statusOptions = statuses.map(s => 
+                `<option value="${s}" ${p.status === s ? 'selected' : ''}>${s}</option>`
+            ).join('');
+
+            // Badge Color Logic for preview
+            let bgClass = '';
+            if(p.status === 'Done') bgClass = 'table-success';
+            if(p.status === 'Delayed' || p.status === 'Cancelled') bgClass = 'table-danger';
+
+            const row = `
+                <tr class="${bgClass}">
+                    <td class="fw-bold small">${p.name}</td>
+                    <td class="small text-muted">${p.target}</td>
+                    <td>
+                        <input type="text" class="form-control form-control-sm" placeholder="Actual result/notes..." 
+                            value="${p.realization}" onchange="updateRealization(${p.id}, 'realization', this.value)">
+                    </td>
+                    <td>
+                        <select class="form-select form-select-sm" onchange="updateRealization(${p.id}, 'status', this.value); renderTable();">
+                            ${statusOptions}
+                        </select>
+                    </td>
+                    <td class="text-center">
+                        <button onclick="removePlan(${p.id})" class="btn btn-outline-danger btn-sm border-0"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+            `;
+            tbody.innerHTML += row;
+        });
+        
+        updateStats();
+    }
+
+    function updateStats() {
+        const total = plans.length;
+        const completed = plans.filter(p => p.status === 'Done').length;
+        const rate = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+        document.getElementById('totalPlans').innerText = total;
+        document.getElementById('completedPlans').innerText = completed;
+        document.getElementById('successRate').innerText = rate + "%";
+    }
+
+    function generatePDF() {
+        if (plans.length === 0) return alert("Add at least one plan to generate report.");
+
+        const manager = document.getElementById('managerName').value || "IT Manager";
+        const type = document.getElementById('reportType').value;
+        const period = document.getElementById('periodStr').value || "Current Period";
+        const rate = document.getElementById('successRate').innerText;
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('landscape'); // Landscape is better for wide tables
+
+        // Header
+        doc.setFillColor(15, 23, 42); // Slate 900
+        doc.rect(0, 0, 300, 35, 'F');
+        
+        doc.setFontSize(22);
+        doc.setTextColor(255, 255, 255);
+        doc.text("IT WORK PLAN & REALIZATION REPORT", 14, 20);
+        
+        doc.setFontSize(11);
+        doc.text(`${type} - ${period}`, 14, 28);
+
+        // Info & KPI
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(11);
+        doc.text(`Department Head: ${manager}`, 14, 50);
+        
+        // Highlight KPI
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(16, 185, 129); // Emerald 500
+        doc.text(`KPI Success Rate: ${rate}`, 220, 50);
+        doc.setTextColor(0,0,0);
+        doc.setFont("helvetica", "normal");
+
+        // Table Data
+        const tableBody = plans.map((p, index) => [
+            index + 1,
+            p.name,
+            p.target,
+            p.realization || "-",
+            p.status
+        ]);
+
+        doc.autoTable({
+            startY: 60,
+            head: [['No', 'Planned Program', 'Target / KPI', 'Actual Realization', 'Status']],
+            body: tableBody,
+            theme: 'grid',
+            headStyles: { fillColor: [59, 130, 246] }, // Blue 500
+            columnStyles: {
+                0: { cellWidth: 15, halign: 'center' },
+                1: { cellWidth: 65, fontStyle: 'bold' },
+                2: { cellWidth: 60 },
+                3: { cellWidth: 90 },
+                4: { cellWidth: 30, halign: 'center', fontStyle: 'bold' }
+            },
+            didParseCell: function(data) {
+                // Color code the status column in PDF
+                if (data.section === 'body' && data.column.index === 4) {
+                    if (data.cell.raw === 'Done') data.cell.styles.textColor = [16, 185, 129]; // Green
+                    if (data.cell.raw === 'Delayed' || data.cell.raw === 'Cancelled') data.cell.styles.textColor = [220, 38, 38]; // Red
+                }
+            }
+        });
+
+        // Signatures
+        let finalY = doc.lastAutoTable.finalY + 30;
+        if (finalY > 180) { doc.addPage(); finalY = 30; } // Landscape page height is ~210
+
+        doc.setFontSize(10);
+        doc.text("Prepared By,", 30, finalY);
+        doc.text("Approved By (Director/CEO),", 200, finalY);
+        
+        doc.line(20, finalY + 25, 70, finalY + 25); 
+        doc.line(190, finalY + 25, 260, finalY + 25); 
+
+        doc.text(`( ${manager} )`, 30, finalY + 32);
+        doc.text("(                                  )", 205, finalY + 32);
+
+        // Save
+        doc.save(`IT_Report_${type.split(' ')[0]}_${period.replace(/\s/g, '_')}.pdf`);
+    }
+</script>
+
+</body>
+</html>
